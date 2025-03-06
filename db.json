@@ -1,0 +1,41 @@
+{
+  "users": {
+    "0": {
+      "name": "User0",
+      "pass": "User0",
+      "date": "2025-1-01T13:00:00Z",
+      "friends": [
+        1
+      ]
+    },
+    "1": {
+      "name": "User1",
+      "pass": "User1",
+      "date": "2025-1-01T13:00:00Z",
+      "friends": [
+        0
+      ]
+    }
+  },
+  "chats": {
+    "0": {
+      "name": "User0 & User1",
+      "users": [
+        0,
+        1
+      ],
+      "msgs": [
+        {
+          "from": 0,
+          "date": "2025-1-01T13:00:00Z",
+          "msg": "User0"
+        },
+        {
+          "from": 1,
+          "date": "2025-1-01T13:00:00Z",
+          "msg": "User1"
+        }
+      ]
+    }
+  }
+}
