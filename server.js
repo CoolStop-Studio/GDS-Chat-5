@@ -1,3 +1,7 @@
+// =====================================
+// ======== I N I T I A L I Z E ========
+// =====================================
+
 import express from 'express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -40,6 +44,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(join(__dirname, 'public')));
 app.use(express.json()); // Parse JSON bodies
 
+// =====================================
+// =============== A P I ===============
+// =====================================
+
 // Initialize the database
 async function initializeDb() {
   // Read existing data from db.json
@@ -48,69 +56,84 @@ async function initializeDb() {
   await db.write();
 }
 
+async function read(path) {
+  try {
+
+    if (!path) {
+      return { error: 'Read: Path parameter is required', status: 400 };
+    }
+  
+    await db.read();
+    const result = lodash.get(db.data, path);
+    
+    if (result === undefined) {
+      return { error: `Read: No value defined at path: "${path}"`, status: 404 };
+    }
+
+    return result;
+
+  } catch(err) {
+    console.error("Read: Error: " + err.message)
+    return { error: 'Error reading from database: ' + err.message, status: 500 };
+  }
+}
+
+async function write(path, value) {
+  try {
+    if (!path) {
+      return { error: 'Write: Path parameter is required', status: 400 };
+    }
+  
+    if (value === undefined) {
+      return { error: 'Write: Value parameter is required', status: 400 };
+    }
+  
+    await db.read();
+  
+    lodash.set(db.data, path, value);
+  
+    await db.write();
+    
+    return { success: true, message: `"${value}" successfully written to "${path}"` }
+
+  } catch(err) {
+    console.error("Write: Error: " + err.message)
+    return { error: 'Error writing to database: ' + err.message, status: 500 };
+  }
+  
+}
+
+
+// =====================================
+// ============ R O U T E S ============
+// =====================================
+
 // API route to read data from a specific path
 app.get('/api/read', async (req, res) => {
-  try {
-    const { path } = req.query;
-    
-    if (!path) {
-      return res.status(400).json({ error: 'Path parameter is required' });
-    }
-    
-    await db.read();
-    
-    // Use lodash get to safely retrieve nested properties
-    const value = lodash.get(db.data, path);
-    
-    if (value === undefined) {
-      return res.status(404).json({ error: 'Path not found in database' });
-    }
-    
-    res.json({ value });
-  } catch (error) {
-    console.error('Error reading from database:', error);
-    res.status(500).json({ error: 'Failed to read from database' });
+  const result = await read(req.query.path);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
   }
+
+  res.json({ value: result }); 
 });
+
 
 // API route to write data to a specific path
 app.post('/api/write', async (req, res) => {
-  try {
-    const { path, value } = req.body;
-    
-    if (!path) {
-      return res.status(400).json({ error: 'Path parameter is required' });
-    }
-    
-    if (value === undefined) {
-      return res.status(400).json({ error: 'Value parameter is required' });
-    }
-    
-    await db.read();
-    
-    // Use lodash set to safely set nested properties
-    lodash.set(db.data, path, value);
-    
-    // Write the updated data to the database
-    await db.write();
-    
-    res.json({ success: true, message: `Value written to ${path}` });
-  } catch (error) {
-    console.error('Error writing to database:', error);
-    res.status(500).json({ error: 'Failed to write to database' });
+  const result = await write(req.body.path, req.body.value);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
   }
+
+  return res.json(result);
 });
 
-// Basic API routes for reference
-app.get('/api/users', async (req, res) => {
-  await db.read();
-  res.json(db.data.users);
-});
-
-app.get('/api/chats', async (req, res) => {
-  await db.read();
-  res.json(db.data.chats);
-});
+// =====================================
+// ============= S T A R T =============
+// =====================================
 
 // Start server
 initializeDb().then(() => {
