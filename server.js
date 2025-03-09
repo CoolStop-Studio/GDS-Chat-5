@@ -122,6 +122,7 @@ app.get('/api/read', async (req, res) => {
 
 // API route to write data to a specific path
 app.post('/api/write', async (req, res) => {
+  console.log("WRITING!: " + req)
   const result = await write(req.body.path, req.body.value);
 
   if (result.error) {
