@@ -359,7 +359,9 @@ input:checked + .slider:before {
   // Predefined routes with named parameters
   const predefinedRoutes = [
       { name: "read", route: "api/read", params: ["path"] },
-      { name: "write", route: "api/write", params: ["path", "value"] }
+      { name: "write", route: "api/write", params: ["path", "value"] },
+      { name: "register", route: "api/registerUser", params: ["username", "password"] },
+      { name: "login", route: "api/tryLogin", params: ["username", "password"] }
   ];
   
   // DOM elements

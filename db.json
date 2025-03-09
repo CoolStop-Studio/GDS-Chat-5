@@ -1,24 +1,33 @@
 {
-  "users": {
-    "0": {
-      "name": "pp boi 88",
+  "users": [
+    {
+      "name": "User0",
       "pass": "User0",
       "date": "2025-1-01T13:00:00Z",
       "friends": [
         1
-      ]
+      ],
+      "reqs": []
     },
-    "1": {
+    {
       "name": "User1",
       "pass": "User1",
       "date": "2025-1-01T13:00:00Z",
       "friends": [
         0
-      ]
+      ],
+      "reqs": []
+    },
+    {
+      "name": "jimmy1",
+      "pass": "eeeeeeepassword",
+      "date": "2025-03-09T15:39:10.444Z",
+      "friends": [],
+      "reqs": []
     }
-  },
-  "chats": {
-    "0": {
+  ],
+  "chats": [
+    {
       "name": "User0 & User1",
       "users": [
         0,
@@ -28,14 +37,14 @@
         {
           "from": 0,
           "date": "2025-1-01T13:00:00Z",
-          "msg": "User0"
+          "msg": "I'm User0"
         },
         {
           "from": 1,
           "date": "2025-1-01T13:00:00Z",
-          "msg": "User1"
+          "msg": "I'm User1"
         }
       ]
     }
-  }
+  ]
 }
