@@ -1,4 +1,14 @@
 {
+  "info": {
+    "minUsernameLength": 4,
+    "maxUsernameLength": 30,
+    "minPasswordLength": 6,
+    "maxPasswordLength": 30,
+    "minChatnameLength": 1,
+    "maxChatnameLength": 30,
+    "minChatUserAmount": 2,
+    "maxChatUserAmount": 15
+  },
   "users": [
     {
       "name": "User0",
@@ -16,13 +26,6 @@
       "friends": [
         0
       ],
-      "reqs": []
-    },
-    {
-      "name": "jimmy1",
-      "pass": "eeeeeeepassword",
-      "date": "2025-03-09T15:39:10.444Z",
-      "friends": [],
       "reqs": []
     }
   ],
@@ -45,6 +48,48 @@
           "msg": "I'm User1"
         }
       ]
+    },
+    {
+      "name": "fun chat!",
+      "users": "[0, 9, 4]",
+      "msgs": []
+    },
+    {
+      "name": "yippeeeee",
+      "users": [
+        "1",
+        "9",
+        "4"
+      ],
+      "msgs": []
+    },
+    {
+      "name": "ok bruh",
+      "users": "[1, true, \"YE\"]",
+      "msgs": []
+    },
+    {
+      "name": "aaaaaaaaaaaaaaaaaaaaa",
+      "users": "[0, 2, 3]",
+      "msgs": []
+    },
+    {
+      "name": "aaaaaaaaaaaaaaaaaaaaa",
+      "users": [
+        0,
+        2,
+        3
+      ],
+      "msgs": []
+    },
+    {
+      "name": "aaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeeeeeeeeeeeeeeee",
+      "users": [
+        0,
+        2,
+        5
+      ],
+      "msgs": []
     }
   ]
 }

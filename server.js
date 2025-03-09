@@ -31,7 +31,11 @@ const defaultData = {
     minUsernameLength: 4,
     maxUsernameLength: 30,
     minPasswordLength: 6,
-    maxPasswordLength: 30
+    maxPasswordLength: 30,
+    minChatnameLength: 1,
+    maxChatnameLength: 30,
+    minChatUserAmount: 2,
+    maxChatUserAmount: 15 
   },
   users: [
     { name: "User0", pass: "User0", date: "2025-1-01T13:00:00Z", friends: [1], reqs: [] },
@@ -153,11 +157,35 @@ async function tryLogin(username, password) {
 }
 
 async function newChat(name, users) {
-  // no return value
-}
+  try {
+    const info = await read('info');
 
-async function deleteChat(chat) {
-  // no return value
+    if (!name) return { error: `New Chat: name parameter required`, status: 400 };
+    if (!users) return { error: `New Chat: users parameter required`, status: 400 };
+
+    if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
+    if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
+    if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
+    if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
+
+    const time = new Date();
+
+    const chat = {
+      name: name,
+      users: users,
+      msgs: []
+    }
+
+    await db.read();
+    db.data.chats.push(chat);
+    await db.write();
+    
+    
+    return { success: true, message: `Chat "${name}" successfully created` };
+  } catch (err) {
+    console.error("Register: Error: " + err.message);
+    return { error: 'Register: Error registering user to database: ' + err.message, status: 500 };
+  }
 }
 
 async function addUserToChat(chat, user) {
@@ -259,6 +287,17 @@ app.get('/api/tryLogin', async (req, res) => {
 
   return res.json({ success: true, message: 'Login successful' });
 });
+
+app.post('/api/newChat', async (req, res) => {
+  const result = await newChat(req.body.name, req.body.users);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
 
 // Serve the main application page
 app.get('/', (req, res) => {
