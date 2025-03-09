@@ -1,7 +1,3 @@
-// =====================================
-// ======== I N I T I A L I Z E ========
-// =====================================
-
 import express from 'express';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -9,9 +5,25 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 import lodash from 'lodash';
 
+// =====================================
+// =========== CONFIGURATION ==========
+// =====================================
+
 // ES module fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// File paths
+const fileFolder = join(__dirname, 'public');
+const fileName = "test.html";
+const dbFile = join(__dirname, 'db.json');
+
+// Server settings
+const PORT = process.env.PORT || 3000;
+
+// =====================================
+// =========== DATABASE SETUP =========
+// =====================================
 
 // Default data structure
 const defaultData = {
@@ -32,17 +44,8 @@ const defaultData = {
 };
 
 // Configure lowdb to use JSON file for storage
-const file = join(__dirname, 'db.json');
-const adapter = new JSONFile(file);
+const adapter = new JSONFile(dbFile);
 const db = new Low(adapter, defaultData);
-
-// Initialize Express app
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Serve static files from 'public' directory
-app.use(express.static(join(__dirname, 'public')));
-app.use(express.json()); // Parse JSON bodies
 
 // =====================================
 // =============== A P I ===============
@@ -50,62 +53,58 @@ app.use(express.json()); // Parse JSON bodies
 
 // Initialize the database
 async function initializeDb() {
-  // Read existing data from db.json
   await db.read();
-  // Write to ensure the file exists
   await db.write();
 }
 
+// Read data from database at specified path
 async function read(path) {
   try {
-
-    if (!path) {
-      return { error: 'Read: Path parameter is required', status: 400 };
-    }
-  
+    if (!path) return { error: 'Read: Path parameter is required', status: 400 };
+    
     await db.read();
     const result = lodash.get(db.data, path);
-    
+
     if (result === undefined) {
       return { error: `Read: No value defined at path: "${path}"`, status: 404 };
     }
-
     return result;
-
-  } catch(err) {
-    console.error("Read: Error: " + err.message)
+  } catch (err) {
+    console.error("Read: Error: " + err.message);
     return { error: 'Error reading from database: ' + err.message, status: 500 };
   }
 }
 
+// Write data to database at specified path
 async function write(path, value) {
   try {
-    if (!path) {
-      return { error: 'Write: Path parameter is required', status: 400 };
-    }
-  
-    if (value === undefined) {
-      return { error: 'Write: Value parameter is required', status: 400 };
-    }
-  
+    if (!path) return { error: 'Write: Path parameter is required', status: 400 };
+    if (value === undefined) return { error: 'Write: Value parameter is required', status: 400 };
+    
     await db.read();
-  
     lodash.set(db.data, path, value);
-  
     await db.write();
     
-    return { success: true, message: `"${value}" successfully written to "${path}"` }
-
-  } catch(err) {
-    console.error("Write: Error: " + err.message)
+    return { success: true, message: `"${value}" successfully written to "${path}"` };
+  } catch (err) {
+    console.error("Write: Error: " + err.message);
     return { error: 'Error writing to database: ' + err.message, status: 500 };
   }
-  
 }
 
+// =====================================
+// =========== EXPRESS SETUP ==========
+// =====================================
+
+// Initialize Express app
+const app = express();
+
+// Configure middleware
+app.use(express.static(fileFolder));
+app.use(express.json());
 
 // =====================================
-// ============ R O U T E S ============
+// ============== ROUTES ==============
 // =====================================
 
 // API route to read data from a specific path
@@ -116,13 +115,11 @@ app.get('/api/read', async (req, res) => {
     return res.status(result.status).json({ error: result.error });
   }
 
-  res.json({ value: result }); 
+  res.json({ value: result });
 });
-
 
 // API route to write data to a specific path
 app.post('/api/write', async (req, res) => {
-  console.log("WRITING!: " + req)
   const result = await write(req.body.path, req.body.value);
 
   if (result.error) {
@@ -132,11 +129,16 @@ app.post('/api/write', async (req, res) => {
   return res.json(result);
 });
 
+// Serve the main application page
+app.get('/', (req, res) => {
+  res.sendFile(join(fileFolder, fileName));
+});
+
 // =====================================
-// ============= S T A R T =============
+// =========== SERVER START ===========
 // =====================================
 
-// Start server
+// Start the server after database initialization
 initializeDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

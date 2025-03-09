@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database API Interface</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2c3e50;
+    --accent-color: #e74c3c;
+    --light-color: #ecf0f1;
+    --dark-color: #34495e;
+    --success-color: #2ecc71;
+    --card-hover: #f5f7fa;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background-color: #f5f7fa;
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+h1, h2, h3 {
+    margin-bottom: 15px;
+}
+
+section {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.route-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--dark-color);
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.route-content {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+.route-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.route-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.route-card:hover {
+    background-color: var(--card-hover);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+}
+
+.route-card.selected {
+    border: 2px solid var(--primary-color);
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.send-button {
+    padding: 12px 24px;
+    margin-top: 15px;
+    font-size: 18px;
+    background-color: var(--success-color);
+}
+
+.send-button:hover {
+    background-color: #27ae60;
+}
+
+.param-input {
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: var(--light-color);
+}
+
+.response-display {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    min-height: 150px;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.instructions {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+    font-style: italic;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    padding: 20px;
+    color: #777;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-right: 10px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .route-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    header {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Database API Interface</h1>
+        </header>
+        
+        <main>
+            <section class="route-selection">
+                <h2>API Routes</h2>
+                
+                <div class="route-tabs">
+                    <button class="tab-btn active" id="predefined-tab">Predefined Routes</button>
+                    <button class="tab-btn" id="custom-tab">Custom Route</button>
+                </div>
+                
+                <div class="route-content" id="predefined-routes">
+                    <h3>Select a predefined route</h3>
+                    <div class="route-cards" id="route-cards-container">
+                        <!-- Route cards will be generated here by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="route-content hidden" id="custom-route">
+                    <h3>Create a custom route</h3>
+                    <form id="custom-route-form">
+                        <div class="form-group">
+                            <label for="route-name">Route Name:</label>
+                            <input type="text" id="route-name" placeholder="e.g., update" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="route-path">Route Path:</label>
+                            <input type="text" id="route-path" placeholder="e.g., api/update" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="param-count">Number of Parameters:</label>
+                            <input type="number" id="param-count" min="0" max="10" value="1">
+                        </div>
+                        
+                        <div class="toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="custom-use-fetch">
+                                <span class="slider"></span>
+                            </label>
+                            <label for="custom-use-fetch">Use URL query parameters (fetch)</label>
+                        </div>
+                        
+                        <!-- Custom parameter fields will be generated here -->
+                        <div id="custom-params-container"></div>
+                        
+                        <button type="button" id="create-custom-route">Create Route</button>
+                    </form>
+                </div>
+            </section>
+            
+            <section class="parameter-section" id="parameter-section">
+                <h2>Route Parameters</h2>
+                <div class="toggle-container">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="use-fetch-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="use-fetch-toggle">Use URL query parameters (fetch)</label>
+                </div>
+                <div id="param-inputs">
+                    <!-- Parameter inputs will be generated here -->
+                    <p class="instructions">Select a route to configure parameters</p>
+                </div>
+                <button id="send-request" class="send-button" disabled>Send Request</button>
+            </section>
+            
+            <section class="response-section">
+                <h2>Server Response</h2>
+                <div class="response-display">
+                    <pre id="response-output">No response yet</pre>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Database API Interface | Created 2025</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+  // Predefined routes with named parameters
+  const predefinedRoutes = [
+      { name: "read", route: "api/read", params: ["path"] },
+      { name: "write", route: "api/write", params: ["path", "value"] }
+  ];
+  
+  // DOM elements
+  const routeCardsContainer = document.getElementById('route-cards-container');
+  const predefinedTab = document.getElementById('predefined-tab');
+  const customTab = document.getElementById('custom-tab');
+  const predefinedRouteContent = document.getElementById('predefined-routes');
+  const customRouteContent = document.getElementById('custom-route');
+  const paramInputsContainer = document.getElementById('param-inputs');
+  const sendRequestButton = document.getElementById('send-request');
+  const responseOutput = document.getElementById('response-output');
+  const createCustomRouteButton = document.getElementById('create-custom-route');
+  const paramCountInput = document.getElementById('param-count');
+  const customParamContainer = document.getElementById('custom-params-container');
+  const useFetchToggle = document.getElementById('use-fetch-toggle');
+  const customUseFetchToggle = document.getElementById('custom-use-fetch');
+  
+  // Current route state
+  let selectedRoute = null;
+  
+  // Create route cards for predefined routes
+  function createRouteCards() {
+      routeCardsContainer.innerHTML = '';
+      
+      predefinedRoutes.forEach(route => {
+          const card = document.createElement('div');
+          card.className = 'route-card';
+          card.innerHTML = `
+              <h4>${route.name}</h4>
+              <p><strong>Path:</strong> ${route.route}</p>
+              <p><strong>Parameters:</strong> ${route.params.join(', ')}</p>
+          `;
+          
+          card.addEventListener('click', () => selectRoute(route));
+          routeCardsContainer.appendChild(card);
+      });
+  }
+  
+  // Handle tab switching
+  predefinedTab.addEventListener('click', () => {
+      predefinedTab.classList.add('active');
+      customTab.classList.remove('active');
+      predefinedRouteContent.classList.remove('hidden');
+      customRouteContent.classList.add('hidden');
+  });
+  
+  customTab.addEventListener('click', () => {
+      customTab.classList.add('active');
+      predefinedTab.classList.remove('active');
+      customRouteContent.classList.remove('hidden');
+      predefinedRouteContent.classList.add('hidden');
+      
+      // Reset custom param fields
+      updateCustomParamFields();
+  });
+  
+  // Select a route and update parameter inputs
+  function selectRoute(route) {
+      // Reset previous selection
+      document.querySelectorAll('.route-card').forEach(card => {
+          card.classList.remove('selected');
+      });
+      
+      // If this is from predefined routes, highlight the card
+      if (predefinedRoutes.includes(route)) {
+          const cards = document.querySelectorAll('.route-card');
+          const index = predefinedRoutes.indexOf(route);
+          if (cards[index]) {
+              cards[index].classList.add('selected');
+          }
+      }
+      
+      selectedRoute = route;
+      updateParameterInputs(route);
+      sendRequestButton.disabled = false;
+      
+      // For custom routes, sync the fetch toggle with the one from the custom form
+      if (route.custom && customUseFetchToggle.checked) {
+          useFetchToggle.checked = true;
+      }
+  }
+  
+  // Update parameter input fields based on selected route
+  function updateParameterInputs(route) {
+      paramInputsContainer.innerHTML = '';
+      
+      if (!route || !route.params || route.params.length === 0) {
+          paramInputsContainer.innerHTML = '<p class="instructions">No parameters needed for this route</p>';
+          return;
+      }
+      
+      for (let i = 0; i < route.params.length; i++) {
+          const paramName = route.params[i];
+          const paramContainer = document.createElement('div');
+          paramContainer.className = 'param-input';
+          
+          paramContainer.innerHTML = `
+              <div class="form-group">
+                  <label for="param-${i}">${paramName}:</label>
+                  <input type="text" id="param-${i}" data-param-name="${paramName}" placeholder="Enter ${paramName}" required>
+              </div>
+              <div class="form-group">
+                  <label for="param-type-${i}">Type:</label>
+                  <select id="param-type-${i}">
+                      <option value="string">String</option>
+                      <option value="number">Number</option>
+                      <option value="boolean">Boolean</option>
+                      <option value="json">JSON</option>
+                  </select>
+              </div>
+          `;
+          
+          paramInputsContainer.appendChild(paramContainer);
+      }
+  }
+  
+  // Update custom parameter fields based on the count
+  function updateCustomParamFields() {
+      if (!customParamContainer) {
+          // Create the container if it doesn't exist
+          customParamContainer = document.createElement('div');
+          customParamContainer.id = 'custom-params-container';
+          document.getElementById('custom-route-form').insertBefore(
+              customParamContainer, 
+              document.getElementById('create-custom-route')
+          );
+      } else {
+          customParamContainer.innerHTML = '';
+      }
+      
+      const count = parseInt(paramCountInput.value) || 0;
+      
+      for (let i = 0; i < count; i++) {
+          const paramField = document.createElement('div');
+          paramField.className = 'form-group';
+          paramField.innerHTML = `
+              <label for="custom-param-${i}">Parameter ${i + 1} Name:</label>
+              <input type="text" id="custom-param-${i}" placeholder="e.g., id, name, value" required>
+          `;
+          
+          customParamContainer.appendChild(paramField);
+      }
+  }
+  
+  // Listen for changes to param count
+  paramCountInput.addEventListener('change', updateCustomParamFields);
+  paramCountInput.addEventListener('input', updateCustomParamFields);
+  
+  // Create custom route
+  createCustomRouteButton.addEventListener('click', () => {
+      const routeName = document.getElementById('route-name').value.trim();
+      const routePath = document.getElementById('route-path').value.trim();
+      const paramCount = parseInt(paramCountInput.value) || 0;
+      const useFetch = customUseFetchToggle.checked;
+      
+      if (!routeName || !routePath) {
+          alert('Please enter both route name and path.');
+          return;
+      }
+      
+      // Collect parameter names for custom route
+      const customParams = [];
+      
+      for (let i = 0; i < paramCount; i++) {
+          const paramInput = document.getElementById(`custom-param-${i}`);
+          if (paramInput && paramInput.value.trim()) {
+              customParams.push(paramInput.value.trim());
+          } else {
+              customParams.push(`param${i + 1}`);
+          }
+      }
+      
+      const customRoute = {
+          name: routeName,
+          route: routePath,
+          params: customParams,
+          custom: true,
+          useFetch: useFetch
+      };
+      
+      selectRoute(customRoute);
+      
+      // Sync the fetch toggle with the one from the custom form
+      useFetchToggle.checked = useFetch;
+      
+      // Switch to parameter section
+      document.getElementById('parameter-section').scrollIntoView({ behavior: 'smooth' });
+  });
+  
+  // Send API request
+  sendRequestButton.addEventListener('click', async () => {
+      if (!selectedRoute) {
+          alert('Please select a route first.');
+          return;
+      }
+      
+      // Collect parameter values
+      const paramData = {};
+      const errors = [];
+      
+      for (let i = 0; i < selectedRoute.params.length; i++) {
+          const paramInput = document.getElementById(`param-${i}`);
+          const paramType = document.getElementById(`param-type-${i}`).value;
+          const paramName = selectedRoute.params[i];
+          
+          if (!paramInput || !paramInput.value.trim()) {
+              errors.push(`Parameter '${paramName}' is required.`);
+              continue;
+          }
+          
+          let value = paramInput.value.trim();
+          
+          // Convert value based on type
+          try {
+              switch (paramType) {
+                  case 'number':
+                      value = Number(value);
+                      if (isNaN(value)) throw new Error(`Parameter '${paramName}' must be a valid number.`);
+                      break;
+                  case 'boolean':
+                      value = value.toLowerCase();
+                      if (value !== 'true' && value !== 'false') 
+                          throw new Error(`Parameter '${paramName}' must be 'true' or 'false'.`);
+                      value = value === 'true';
+                      break;
+                  case 'json':
+                      value = JSON.parse(value);
+                      break;
+              }
+          } catch (error) {
+              errors.push(error.message);
+              continue;
+          }
+          
+          // Store parameter with its proper name
+          paramData[paramName] = value;
+      }
+      
+      if (errors.length > 0) {
+          alert(`Validation errors:\n${errors.join('\n')}`);
+          return;
+      }
+      
+      // Send actual API request
+      responseOutput.innerText = 'Sending request...';
+      
+      try {
+          // Determine HTTP method based on route
+          let method = 'GET';
+          if (selectedRoute.name === 'write') method = 'POST';
+          else if (selectedRoute.name === 'update') method = 'PUT';
+          else if (selectedRoute.name === 'delete') method = 'DELETE';
+
+          // Build request URL
+          let url = `/${selectedRoute.route}`;
+          
+          // Check if we should use fetch (URL query parameters)
+          const useFetch = useFetchToggle.checked || selectedRoute.useFetch;
+          
+          if (useFetch) {
+              // Use URL query parameters
+              const queryParams = new URLSearchParams();
+              
+              for (const [key, value] of Object.entries(paramData)) {
+                  if (typeof value === 'object') {
+                      queryParams.append(key, JSON.stringify(value));
+                  } else {
+                      queryParams.append(key, value);
+                  }
+              }
+              
+              const queryString = queryParams.toString();
+              if (queryString) {
+                  url = `${url}?${queryString}`;
+              }
+              
+              const response = await fetch(url, {
+                  method,
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              });
+              
+              const data = await response.json();
+              responseOutput.innerText = JSON.stringify(data, null, 2);
+          } else {
+              // Add URL parameters for GET requests with ID or path (old method)
+              if (method === 'GET' && (paramData.id || paramData.path)) {
+                  const paramValue = paramData.id || paramData.path;
+                  url += `/${paramValue}`;
+              }
+
+              const response = await fetch(url, {
+                  method,
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: method !== 'GET' ? JSON.stringify(paramData) : undefined
+              });
+              
+              const data = await response.json();
+              responseOutput.innerText = JSON.stringify(data, null, 2);
+          }
+          
+          // Log request details for debugging
+          console.log(`Request to ${url}`, {
+              method,
+              useFetch,
+              params: paramData
+          });
+
+      } catch (error) {
+          responseOutput.innerText = `Error: ${error.message}`;
+      }
+  });
+  
+  // Initialize the application
+  createRouteCards();
+  updateCustomParamFields();
+});
+    </script>
+</body>
+</html>
