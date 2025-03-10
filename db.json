@@ -12,7 +12,7 @@
   "users": [
     {
       "name": "User0",
-      "pass": "User0",
+      "pass": "pasidouaisdhe",
       "date": "2025-1-01T13:00:00Z",
       "friends": [
         1
@@ -26,6 +26,17 @@
       "friends": [
         0
       ],
+      "reqs": [
+        0
+      ]
+    },
+    {
+      "name": "User2",
+      "pass": "User2",
+      "date": "2025-1-01T13:00:00Z",
+      "friends": [
+        0
+      ],
       "reqs": []
     }
   ],
@@ -33,8 +44,7 @@
     {
       "name": "User0 & User1",
       "users": [
-        0,
-        1
+        0
       ],
       "msgs": [
         {
@@ -46,50 +56,13 @@
           "from": 1,
           "date": "2025-1-01T13:00:00Z",
           "msg": "I'm User1"
+        },
+        {
+          "from": 1,
+          "date": "2025-03-10T01:16:34.381Z",
+          "msg": "hello chat"
         }
       ]
-    },
-    {
-      "name": "fun chat!",
-      "users": "[0, 9, 4]",
-      "msgs": []
-    },
-    {
-      "name": "yippeeeee",
-      "users": [
-        "1",
-        "9",
-        "4"
-      ],
-      "msgs": []
-    },
-    {
-      "name": "ok bruh",
-      "users": "[1, true, \"YE\"]",
-      "msgs": []
-    },
-    {
-      "name": "aaaaaaaaaaaaaaaaaaaaa",
-      "users": "[0, 2, 3]",
-      "msgs": []
-    },
-    {
-      "name": "aaaaaaaaaaaaaaaaaaaaa",
-      "users": [
-        0,
-        2,
-        3
-      ],
-      "msgs": []
-    },
-    {
-      "name": "aaaaaaaaaaaaaaaaaaaaaeeeeeeeeeeeeeeeeeeeeeeeee",
-      "users": [
-        0,
-        2,
-        5
-      ],
-      "msgs": []
     }
   ]
 }

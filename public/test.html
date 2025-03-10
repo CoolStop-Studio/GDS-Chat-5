@@ -391,6 +391,42 @@
                     route: "api/newChat",
                     params: ["name", "users"],
                     method: "POST"
+                },
+                {
+                    name: "add user to chat",
+                    route: "api/addUserToChat",
+                    params: ["chat", "user"],
+                    method: "POST"
+                },
+                {
+                    name: "remove user from chat",
+                    route: "api/removeUserFromChat",
+                    params: ["chat", "user"],
+                    method: "POST"
+                },
+                {
+                    name: "get messages",
+                    route: "api/getMessages",
+                    params: ["chat", "count"],
+                    method: "GET"
+                },
+                {
+                    name: "send message",
+                    route: "api/sendMessage",
+                    params: ["chat", "user", "msg"],
+                    method: "POST"
+                },
+                {
+                    name: "change password",
+                    route: "api/changePassword",
+                    params: ["user", "password"],
+                    method: "POST"
+                },
+                {
+                    name: "send friend request",
+                    route: "api/sendFriendRequest",
+                    params: ["sender", "receiver"],
+                    method: "POST"
                 }
             ];
 
@@ -692,7 +728,13 @@
                             const paramValue = paramData.id || paramData.path;
                             url += `/${paramValue}`;
                         }
-
+                        alert(JSON.stringify({
+                            method,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: method !== 'GET' ? JSON.stringify(paramData) : undefined
+                        }))
                         const response = await fetch(url, {
                             method,
                             headers: {

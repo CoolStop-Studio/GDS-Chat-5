@@ -134,8 +134,8 @@ async function registerUser(username, password) {
 
 async function tryLogin(username, password) {
   try {
-    if (!username) return { error: 'Login: username parameter is required', status: 400 };
-    if (!password) return { error: 'Login: username parameter is required', status: 400 };
+    if (username === undefined) return { error: 'Login: username parameter is required', status: 400 };
+    if (password === undefined) return { error: 'Login: username parameter is required', status: 400 };
 
     await db.read();
 
@@ -160,13 +160,13 @@ async function newChat(name, users) {
   try {
     const info = await read('info');
 
-    if (!name) return { error: `New Chat: name parameter required`, status: 400 };
-    if (!users) return { error: `New Chat: users parameter required`, status: 400 };
+    if (name === undefined) return { error: `New Chat: name parameter required`, status: 400 };
+    if (users === undefined) return { error: `New Chat: users parameter required`, status: 400 };
 
     if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
-    if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
+    if (name.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
     if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
-    if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
+    if (users.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
 
     const time = new Date();
 
@@ -183,40 +183,157 @@ async function newChat(name, users) {
     
     return { success: true, message: `Chat "${name}" successfully created` };
   } catch (err) {
-    console.error("Register: Error: " + err.message);
-    return { error: 'Register: Error registering user to database: ' + err.message, status: 500 };
+    console.error("New Chat: Error: " + err.message);
+    return { error: 'New Chat: Error creating new chat: ' + err.message, status: 500 };
   }
 }
 
 async function addUserToChat(chat, user) {
-  // no return value
+  try {
+    if (chat === undefined) return { error: `Add user to chat: chat parameter required`, status: 400 };
+    if (user === undefined) return { error: `Add user to chat: user parameter required`, status: 400 };
+
+    if (!db.data.users[user]) return { error: `Add user to chat: user does not exist`, status: 400 };
+    if (!db.data.chats[chat]) return { error: `Add user to chat: chat does not exist`, status: 400 };
+
+    await db.read();
+    db.data.chats[chat].users.push(user);
+    await db.write();
+    
+    
+    return { success: true, message: `User "${db.data.users[user].name}" successfully added to chat "${db.data.chats[chat].name}"` };
+  } catch (err) {
+    console.error("Add user to chat: Error: " + err.message);
+    return { error: 'Add user to chat: Error adding user to chat: ' + err.message, status: 500 };
+  }
 }
 
 async function removeUserFromChat(chat, user) {
-  // no return value
+  try {
+    if (chat === undefined) return { error: `Remove user from chat: chat parameter required`, status: 400 };
+    if (user === undefined) return { error: `Remove user from chat: user parameter required`, status: 400 };
+
+    if (db.data.users[user] === undefined) return { error: `Remove user from chat: user does not exist`, status: 400 };
+    if (db.data.chats[chat] === undefined) return { error: `Remove user from chat: chat does not exist`, status: 400 };
+
+    await db.read();
+
+    const index = db.data.chats[chat].users.indexOf(user);
+    if (index > -1) {
+      db.data.chats[chat].users.splice(index, 1);
+      await db.write();
+    } else {
+      return { error: `Remove user from chat: user does not exist in chat`, status: 400 }
+    }
+    
+    
+    return { success: true, message: `User "${db.data.users[user].name}" successfully Removed from chat "${db.data.chats[chat].name}"` };
+  } catch (err) {
+    console.error("Remove user from chat: Error: " + err.message);
+    return { error: 'Remove user from chat: Error adding user to chat: ' + err.message, status: 500 };
+  }
 }
 
 async function getMessages(chat, count) {
-  // returns array of messages
+  try {
+    if (chat === undefined) return { error: 'Get Messages: chat parameter is required', status: 400 };
+    if (count == undefined) return { error: 'Get Messages: count parameter is required', status: 400 };
+    
+    await db.read()
+
+    if (db.data.chats[chat] === undefined) return { error: 'Get Messages: chat does not exist', status: 400 }
+    
+    const takeRight = (arr, n = 1) => arr.slice(-n);
+    const value = takeRight(await db.data.chats[chat].msgs, count);
+
+    return value;
+  } catch (err) {
+    console.error("Get messages: Error: " + err.message);
+    return { error: 'Get messages: Error reading from database: ' + err.message, status: 500 };
+  }
 }
 
-async function sendMessage(chat, user, message) {
-  // no return value
+async function sendMessage(chat, user, msg) {
+  try {
+    if (chat === undefined) return { error: `Send message: chat parameter required`, status: 400 };
+    if (user === undefined) return { error: `Send message: user parameter required`, status: 400 };
+    if (msg === undefined || msg === "") return { error: `Send message: message parameter required`, status: 400 };
+
+    await db.read();
+
+    if (!db.data.users[user]) return { error: `Send message: user does not exist`, status: 400 };
+    if (!db.data.chats[chat]) return { error: `Send message: chat does not exist`, status: 400 };
+
+    const time = new Date();
+
+    const message = {
+      from: user,
+      date: time,
+      msg: msg
+    }
+    
+    db.data.chats[chat].msgs.push(message);
+
+    await db.write();
+
+    return { success: true, message: `Message from "${db.data.users[user].name}" successfully sent to chat "${db.data.chats[chat].name}"` };
+  } catch (err) {
+    console.error("Send message: Error: " + err.message);
+    return { error: 'Send message: Error adding user to chat: ' + err.message, status: 500 };
+  }
 }
 
 async function changePassword(user, password) {
-  // no return value
+  try {
+    if (user === undefined) return { error: `Change password: user parameter required`, status: 400 };
+    if (password === undefined) return { error: `Change password: password parameter required`, status: 400 };
+
+    await db.read();
+
+    if (!db.data.users[user]) return { error: `Change password: user does not exist`, status: 400 };
+
+    const info = await read('info');
+
+    if (password.length < info.minPasswordLength) return { error: `Change password: Password "${password}" is less than minPasswordLength (${minPasswordLength})`, status: 400 };
+    if (password.length > info.maxPasswordLength) return { error: `Change password: Password "${password}" is more than maxPasswordLength (${maxPasswordLength})`, status: 400 };
+
+    db.data.users[user].pass = password;
+
+    await db.write();
+
+    return { success: true, message: `${db.data.users[user].name}'s password successfully changed` };
+  } catch (err) {
+    console.error("Change password: Error: " + err.message);
+    return { error: 'Change password: Error changing password: ' + err.message, status: 500 };
+  }
 }
 
-async function sendFreindRequest(sender, receiver) {
+async function sendFriendRequest(sender, receiver) {
+  try {
+    if (sender === undefined) return { error: `Send request: sender parameter required`, status: 400 };
+    if (receiver === undefined) return { error: `Send request: receiver parameter required`, status: 400 };
+
+    await db.read();
+
+    if (db.data.users[sender] === undefined) return { error: `Send request: sender "${db.data.users[sender]}" is not a user`, status: 400 };
+    if (db.data.users[receiver]  === undefined) return { error: `Send request: receiver "${db.data.users[receiver]}" is not a user`, status: 400 };
+
+    db.data.users[receiver].reqs.push(sender)
+
+    await db.write();
+
+    return { success: true, message: `Request from ${db.data.users[sender].name} successfully sent to ${db.data.users[receiver].name}` };
+  } catch (err) {
+    console.error("Send request: Error: " + err.message);
+    return { error: 'Send request: error sending request: ' + err.message, status: 500 };
+  }
+}
+
+async function acceptFriendRequest(sender, receiver) {
 
 }
 
-async function acceptFreindRequest(sender, receiver) {
-
-}
-
-async function denyFreindRequest(sender, receiver) {
+async function denyFriendRequest(sender, receiver) {
   
 }
 
@@ -298,6 +415,66 @@ app.post('/api/newChat', async (req, res) => {
   return res.json(result);
 });
 
+app.post('/api/addUserToChat', async (req, res) => {
+  const result = await addUserToChat(req.body.chat, req.body.user);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/removeUserFromChat', async (req, res) => {
+  const result = await removeUserFromChat(req.body.chat, req.body.user);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.get('/api/getMessages', async (req, res) => {
+  const result = await getMessages(req.query.chat, req.query.count);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  res.json({ value: result });
+});
+
+app.post('/api/sendMessage', async (req, res) => {
+  const result = await sendMessage(req.body.chat, req.body.user, req.body.msg);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/changePassword', async (req, res) => {
+  const result = await changePassword(req.body.user, req.body.password);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/sendFriendRequest', async (req, res) => {
+  console.log(req.body.receiver)
+  const result = await sendFriendRequest(req.body.sender, req.body.receiver);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
 
 // Serve the main application page
 app.get('/', (req, res) => {
