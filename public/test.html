@@ -662,7 +662,6 @@
                             case 'array':
                                 try {
                                     value = JSON.parse(value);
-                                    alert(value)
                                     if (!Array.isArray(value)) throw new Error();
                                 } catch {
                                     throw new Error(`Parameter '${paramName}' must be a valid array.`);
@@ -728,13 +727,7 @@
                             const paramValue = paramData.id || paramData.path;
                             url += `/${paramValue}`;
                         }
-                        alert(JSON.stringify({
-                            method,
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: method !== 'GET' ? JSON.stringify(paramData) : undefined
-                        }))
+                        
                         const response = await fetch(url, {
                             method,
                             headers: {

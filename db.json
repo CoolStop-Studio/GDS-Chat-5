@@ -11,7 +11,7 @@
   },
   "users": [
     {
-      "name": "User0",
+      "name": "aaaaaaaaaaaaaaaaaa",
       "pass": "pasidouaisdhe",
       "date": "2025-1-01T13:00:00Z",
       "friends": [
@@ -37,6 +37,15 @@
       "friends": [
         0
       ],
+      "reqs": [
+        1
+      ]
+    },
+    {
+      "name": "jimmy",
+      "pass": "eeeeeeee",
+      "date": "2025-03-10T01:38:32.983Z",
+      "friends": [],
       "reqs": []
     }
   ],
@@ -61,6 +70,36 @@
           "from": 1,
           "date": "2025-03-10T01:16:34.381Z",
           "msg": "hello chat"
+        }
+      ]
+    },
+    {
+      "name": "people chat",
+      "users": "[0, 2, 3]",
+      "msgs": []
+    },
+    {
+      "name": "people chat21332",
+      "users": [
+        0,
+        2,
+        3
+      ],
+      "msgs": [
+        {
+          "from": 2,
+          "date": "2025-03-10T01:40:52.193Z",
+          "msg": "hello chatters"
+        },
+        {
+          "from": 3,
+          "date": "2025-03-10T01:41:06.084Z",
+          "msg": "hi boi"
+        },
+        {
+          "from": 3,
+          "date": "2025-03-10T01:41:29.804Z",
+          "msg": "ok bruh"
         }
       ]
     }

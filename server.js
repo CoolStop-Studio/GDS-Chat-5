@@ -466,7 +466,6 @@ app.post('/api/changePassword', async (req, res) => {
 });
 
 app.post('/api/sendFriendRequest', async (req, res) => {
-  console.log(req.body.receiver)
   const result = await sendFriendRequest(req.body.sender, req.body.receiver);
 
   if (result.error) {
