@@ -427,6 +427,18 @@
                     route: "api/sendFriendRequest",
                     params: ["sender", "receiver"],
                     method: "POST"
+                },
+                {
+                    name: "accept friend request",
+                    route: "api/acceptFriendRequest",
+                    params: ["sender", "receiver"],
+                    method: "POST"
+                },
+                {
+                    name: "deny friend request",
+                    route: "api/denyFriendRequest",
+                    params: ["sender", "receiver"],
+                    method: "POST"
                 }
             ];
 

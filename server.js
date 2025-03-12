@@ -38,8 +38,8 @@ const defaultData = {
     maxChatUserAmount: 15 
   },
   users: [
-    { name: "User0", pass: "User0", date: "2025-1-01T13:00:00Z", friends: [1], reqs: [] },
-    { name: "User1", pass: "User1", date: "2025-1-01T13:00:00Z", friends: [0], reqs: [] }
+    { name: "User0", pass: "User0", date: "2025-1-01T13:00:00Z", friends: [], reqs: [] },
+    { name: "User1", pass: "User1", date: "2025-1-01T13:00:00Z", friends: [], reqs: [] }
   ],
   chats: [
     {
@@ -74,7 +74,7 @@ async function read(path) {
     
     await db.read();
     const result = lodash.get(db.data, path);
-
+    
     if (result === undefined) {
       return { error: `Read: No value defined at path: "${path}"`, status: 404 };
     }
@@ -318,8 +318,21 @@ async function sendFriendRequest(sender, receiver) {
     if (db.data.users[sender] === undefined) return { error: `Send request: sender "${db.data.users[sender]}" is not a user`, status: 400 };
     if (db.data.users[receiver]  === undefined) return { error: `Send request: receiver "${db.data.users[receiver]}" is not a user`, status: 400 };
 
-    db.data.users[receiver].reqs.push(sender)
+    if (db.data.users[receiver].friends.includes(sender)) return { error: `Send request: Already freinds`, status: 400 };
+    if (db.data.users[sender].friends.includes(receiver)) return { error: `Send request: Already freinds`, status: 400 };
 
+
+    if (db.data.users[receiver].reqs.includes(sender)) return { error: `Send request: request already sent`, status: 400 };
+
+    if (db.data.users[sender].reqs.includes(receiver)) { // if the sender has a request from receiver
+        console.log("other has request")
+        
+        let result = await acceptFriendRequest(receiver, sender);
+        return result;
+    }
+
+    console.log("NEW REQUEST")
+    db.data.users[receiver].reqs.push(sender);
     await db.write();
 
     return { success: true, message: `Request from ${db.data.users[sender].name} successfully sent to ${db.data.users[receiver].name}` };
@@ -330,14 +343,99 @@ async function sendFriendRequest(sender, receiver) {
 }
 
 async function acceptFriendRequest(sender, receiver) {
+  try {
+    if (sender === undefined) return { error: `Accept request: sender parameter required`, status: 400 };
+    if (receiver === undefined) return { error: `Accept request: receiver parameter required`, status: 400 };
 
+    await db.read();
+
+    if (db.data.users[sender] === undefined) return { error: `Accept request: sender "${db.data.users[sender]}" is not a user`, status: 400 };
+    if (db.data.users[receiver]  === undefined) return { error: `Accept request: receiver "${db.data.users[receiver]}" is not a user`, status: 400 };
+
+    if (!db.data.users[receiver].reqs.includes(sender)) {
+      return { error: `Accept request: receiver does not have request from sender`, status: 400 }
+    }
+
+
+    db.data.users[receiver].friends.push(sender); console.log("Added receiver as freind");
+    db.data.users[sender].friends.push(receiver); console.log("Added sender as freind")
+    db.data.users[receiver].reqs.splice(db.data.users[receiver].reqs.indexOf(sender), 1); console.log("Removed senders request from receivers req")
+    if (db.data.users[sender].reqs.includes(receiver)) {
+      db.data.users[sender].reqs.splice(db.data.users[sender].reqs.indexOf(receiver), 1); console.log("removed receivers request from senders req")
+    }
+    await db.write();
+
+
+
+
+
+    return { success: true, message: `Request from ${db.data.users[sender].name} successfully accepted by ${db.data.users[receiver].name}` };
+  } catch (err) {
+    console.error("Accept request: Error: " + err.message);
+    return { error: 'Accept request: error accepting request: ' + err.message, status: 500 };
+  }
 }
 
 async function denyFriendRequest(sender, receiver) {
-  
+  try {
+    if (sender === undefined) return { error: `Deny request: sender parameter required`, status: 400 };
+    if (receiver === undefined) return { error: `Deny request: receiver parameter required`, status: 400 };
+
+    await db.read();
+
+    if (db.data.users[sender] === undefined) return { error: `Deny request: sender "${db.data.users[sender]}" is not a user`, status: 400 };
+    if (db.data.users[receiver]  === undefined) return { error: `Deny request: receiver "${db.data.users[receiver]}" is not a user`, status: 400 };
+
+    if (!db.data.users[receiver].reqs.includes(sender)) {
+      return { error: `Deny request: receiver does not have request from sender`, status: 400 }
+    }
+
+
+    db.data.users[receiver].reqs.splice(db.data.users[receiver].reqs.indexOf(sender), 1); console.log("Removed senders request from receivers req")
+    if (db.data.users[sender].reqs.includes(receiver)) {
+      db.data.users[sender].reqs.splice(db.data.users[sender].reqs.indexOf(receiver), 1); console.log("removed receivers request from senders req")
+    }
+    
+    await db.write();
+
+
+
+
+
+    return { success: true, message: `Request from ${db.data.users[sender].name} successfully Denied by ${db.data.users[receiver].name}` };
+  } catch (err) {
+    console.error("Deny request: Error: " + err.message);
+    return { error: 'Deny request: error Denying request: ' + err.message, status: 500 };
+  }
 }
 
+async function removeFriend(user1, user2) {
+  try {
+    if (user1 === undefined) return { error: `Remove friend: user1 parameter required`, status: 400 };
+    if (user2 === undefined) return { error: `Remove friend: user2 parameter required`, status: 400 };
 
+    await db.read();
+
+    if (db.data.users[user1] === undefined) return { error: `Remove friend: user1 "${db.data.users[user1]}" is not a user`, status: 400 };
+    if (db.data.users[user2]  === undefined) return { error: `Remove friend: user2 "${db.data.users[user2]}" is not a user`, status: 400 };
+
+    
+
+    db.data.users[user1].reqs.splice(db.data.users[user1].reqs.indexOf(user2), 1);
+    db.data.users[user2].reqs.splice(db.data.users[user2].reqs.indexOf(user1), 1);
+
+    await db.write();
+
+
+
+
+
+    return { success: true, message: `Request from ${db.data.users[sender].name} successfully Denied by ${db.data.users[receiver].name}` };
+  } catch (err) {
+    console.error("Remove friend: Error: " + err.message);
+    return { error: 'Remove friend: error Denying request: ' + err.message, status: 500 };
+  }
+}
 
 
 
@@ -467,6 +565,36 @@ app.post('/api/changePassword', async (req, res) => {
 
 app.post('/api/sendFriendRequest', async (req, res) => {
   const result = await sendFriendRequest(req.body.sender, req.body.receiver);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/acceptFriendRequest', async (req, res) => {
+  const result = await acceptFriendRequest(req.body.sender, req.body.receiver);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/denyFriendRequest', async (req, res) => {
+  const result = await denyFriendRequest(req.body.sender, req.body.receiver);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  return res.json(result);
+});
+
+app.post('/api/removeFriend', async (req, res) => {
+  const result = await removeFriend(req.body.user1, req.body.user2);
 
   if (result.error) {
     return res.status(result.status).json({ error: result.error });
