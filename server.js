@@ -61,7 +61,6 @@ const db = new Low(adapter, defaultData);
 // =============== A P I ===============
 // =====================================
 
-// Initialize the database
 async function initializeDb() {
   await db.read();
   await db.write();
@@ -69,30 +68,31 @@ async function initializeDb() {
 
 // Read data from database at specified path
 async function read(path) {
+  console.log(`REQUEST: READING FROM ${path}`);
   try {
-    if (!path) return { error: 'Read: Path parameter is required', status: 400 };
+    if (path === undefined) return { error: 'Read: Path parameter is required', status: 400 };  // Check if theres a path parameter
     
     await db.read();
-    const result = lodash.get(db.data, path);
+    const result = lodash.get(db.data, path); // Get the value from the path with lodash
     
-    if (result === undefined) {
-      return { error: `Read: No value defined at path: "${path}"`, status: 404 };
-    }
+    if (result === undefined) return { error: `Read: No value defined at path: "${path}"`, status: 404 }; // Check if theres a value at the path
+
     return result;
+
   } catch (err) {
-    console.error("Read: Error: " + err.message);
-    return { error: 'Read: Error reading from database: ' + err.message, status: 500 };
+    console.error('Read: ' + err.message);
+    return { error: 'Read: ' + err.message, status: 500 };
   }
 }
 
-// Write data to database at specified path
 async function write(path, value) {
+  console.log(`REQUEST: WRITE ${value} TO ${path}`);
   try {
-    if (!path) return { error: 'Write: Path parameter is required', status: 400 };
-    if (value === undefined) return { error: 'Write: Value parameter is required', status: 400 };
+    if (path === undefined) return { error: 'Write: Path parameter is required', status: 400 };  // Check if theres a path parameter
+    if (value === undefined) return { error: 'Write: Value parameter is required', status: 400 };  // Check if theres a value parameter
     
     await db.read();
-    lodash.set(db.data, path, value);
+    lodash.set(db.data, path, value); // Set the value to the path
     await db.write();
     
     return { success: true, message: `"${value}" successfully written to "${path}"` };
@@ -103,25 +103,30 @@ async function write(path, value) {
 }
 
 async function registerUser(username, password) {
+  console.log(`REQUEST: REGISTERING ${username} WITH PASSWORD ${password}`);
   try {
-    const info = await read('info');
+    if (username === undefined) return { error: 'Register: username parameter is required', status: 400 }; // Check if theres a username
+    if (password === undefined) return { error: 'Register: passwprd parameter is required', status: 400 }; // Check if theres a password
 
-    if (username.length < info.minUsernameLength) return { error: `Register: Username "${username}" is less than minUsernameLength (${minUsernameLength})`, status: 400 };
-    if (username.length > info.maxUsernameLength) return { error: `Register: Username "${username}" is more than maxUsernameLength (${maxUsernameLength})`, status: 400 };
-    if (password.length < info.minPasswordLength) return { error: `Register: Password "${password}" is less than minPasswordLength (${minPasswordLength})`, status: 400 };
-    if (password.length > info.maxPasswordLength) return { error: `Register: Password "${password}" is more than maxPasswordLength (${maxPasswordLength})`, status: 400 };
+    const info = await read('info'); // Get info
 
-    const time = new Date();
+    if (username.length < info.minUsernameLength) return { error: `Register: Username "${username}" is less than minUsernameLength (${minUsernameLength})`, status: 400 }; // Check if username is shorter than min
+    if (username.length > info.maxUsernameLength) return { error: `Register: Username "${username}" is more than maxUsernameLength (${maxUsernameLength})`, status: 400 }; // Check if username is longer than max
+    if (password.length < info.minPasswordLength) return { error: `Register: Password "${password}" is less than minPasswordLength (${minPasswordLength})`, status: 400 }; // Check if password is shorter than min
+    if (password.length > info.maxPasswordLength) return { error: `Register: Password "${password}" is more than maxPasswordLength (${maxPasswordLength})`, status: 400 }; // Check if password is longer than max
 
-    const user = {
+    const time = new Date(); // Get current time
+
+    const user = { // Setup the user as a variable
       name: username,
       pass: password,
       date: time,
       friends: [],
       reqs: []
     }
+
     await db.read();
-    db.data.users.push(user);
+    db.data.users.push(user); // Push the variable to the database
     await db.write();
     
     
@@ -133,23 +138,20 @@ async function registerUser(username, password) {
 }
 
 async function tryLogin(username, password) {
+  console.log(`REQUEST: ATTEMPTED LOG IN username: ${username} password: ${password}`);
   try {
-    if (username === undefined) return { error: 'Login: username parameter is required', status: 400 };
-    if (password === undefined) return { error: 'Login: username parameter is required', status: 400 };
+    if (username === undefined) return { error: 'Login: username parameter is required', status: 400 }; // Check if theres a username
+    if (password === undefined) return { error: 'Login: passwprd parameter is required', status: 400 }; // Check if theres a password
 
     await db.read();
 
-    const user = db.data.users.find(u => u.name === username);
+    const user = db.data.users.find(u => u.name === username); // Find the user ID by name
 
-    if (!user) {
-      return false;
-    }
+    if (!user) return false; // Check if the username exists
 
-    if (user.pass !== password) {
-      return false;
-    }
+    if (user.pass !== password) return false; // Check if the password is correct
 
-    return true;
+    return true; // If both correct, return true
   } catch (err) {
     console.error("Login: Error: " + err.message);
     return { error: 'Login: Error reading from database: ' + err.message, status: 500 };
@@ -157,27 +159,26 @@ async function tryLogin(username, password) {
 }
 
 async function newChat(name, users) {
+  console.log(`REQUEST: CREATE NEW CHAT ${name} WITH USERS ${users}`);
   try {
-    const info = await read('info');
-
     if (name === undefined) return { error: `New Chat: name parameter required`, status: 400 };
     if (users === undefined) return { error: `New Chat: users parameter required`, status: 400 };
 
-    if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
-    if (name.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
-    if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 };
-    if (users.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 };
+    const info = await read('info'); // Get info
 
-    const time = new Date();
+    if (name.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 }; // Check if name is longer than max
+    if (name.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 }; // Check if name is shorter than min
+    if (users.length < info.minChatnameLength) return { error: `New Chat: Name "${name}" is less than minChatnameLength (${minChatnameLength})`, status: 400 }; // Check if users are more than max
+    if (users.length > info.manChatnameLength) return { error: `New Chat: Name "${name}" is more than maxChatnameLength (${maxChatnameLength})`, status: 400 }; // Check if users are less than min
 
-    const chat = {
+    const chat = { // Setup the chat as a variable
       name: name,
       users: users,
       msgs: []
     }
 
     await db.read();
-    db.data.chats.push(chat);
+    db.data.chats.push(chat); // Push the variable to the database
     await db.write();
     
     
@@ -189,6 +190,7 @@ async function newChat(name, users) {
 }
 
 async function addUserToChat(chat, user) {
+  console.log(`REQUEST: ADD ${user} TO CHAT ${chat}}`);
   try {
     if (chat === undefined) return { error: `Add user to chat: chat parameter required`, status: 400 };
     if (user === undefined) return { error: `Add user to chat: user parameter required`, status: 400 };
@@ -209,6 +211,7 @@ async function addUserToChat(chat, user) {
 }
 
 async function removeUserFromChat(chat, user) {
+  console.log(`REQUEST: REMOVE ${user} FROM CHAT ${chat}}`);
   try {
     if (chat === undefined) return { error: `Remove user from chat: chat parameter required`, status: 400 };
     if (user === undefined) return { error: `Remove user from chat: user parameter required`, status: 400 };
@@ -235,6 +238,7 @@ async function removeUserFromChat(chat, user) {
 }
 
 async function getMessages(chat, count) {
+  console.log(`REQUEST: GET ${count} MESSAGES FROM ${chat}`);
   try {
     if (chat === undefined) return { error: 'Get Messages: chat parameter is required', status: 400 };
     if (count == undefined) return { error: 'Get Messages: count parameter is required', status: 400 };
@@ -254,6 +258,7 @@ async function getMessages(chat, count) {
 }
 
 async function sendMessage(chat, user, msg) {
+  console.log(`REQUEST: SEND ${msg} FROM ${user} TO ${chat}`);
   try {
     if (chat === undefined) return { error: `Send message: chat parameter required`, status: 400 };
     if (user === undefined) return { error: `Send message: user parameter required`, status: 400 };
@@ -284,6 +289,7 @@ async function sendMessage(chat, user, msg) {
 }
 
 async function changePassword(user, password) {
+  console.log(`REQUEST: CHANGE PASSWORD FOR ${user} TO ${password}`);
   try {
     if (user === undefined) return { error: `Change password: user parameter required`, status: 400 };
     if (password === undefined) return { error: `Change password: password parameter required`, status: 400 };
@@ -309,6 +315,7 @@ async function changePassword(user, password) {
 }
 
 async function sendFriendRequest(sender, receiver) {
+  console.log(`REQUEST: SEND FREIND REQUEST FROM ${sender} TO ${receiver}`);
   try {
     if (sender === undefined) return { error: `Send request: sender parameter required`, status: 400 };
     if (receiver === undefined) return { error: `Send request: receiver parameter required`, status: 400 };
@@ -343,6 +350,7 @@ async function sendFriendRequest(sender, receiver) {
 }
 
 async function acceptFriendRequest(sender, receiver) {
+  console.log(`REQUEST: ACCEPT FREIND REQUEST FROM ${sender} BY ${receiver}`);
   try {
     if (sender === undefined) return { error: `Accept request: sender parameter required`, status: 400 };
     if (receiver === undefined) return { error: `Accept request: receiver parameter required`, status: 400 };
@@ -377,6 +385,7 @@ async function acceptFriendRequest(sender, receiver) {
 }
 
 async function denyFriendRequest(sender, receiver) {
+  console.log(`REQUEST: DENY FREIND REQUEST FROM ${sender} BY ${receiver}`);
   try {
     if (sender === undefined) return { error: `Deny request: sender parameter required`, status: 400 };
     if (receiver === undefined) return { error: `Deny request: receiver parameter required`, status: 400 };
@@ -410,6 +419,7 @@ async function denyFriendRequest(sender, receiver) {
 }
 
 async function removeFriend(user1, user2) {
+  console.log(`REQUEST: REMOVE FREIND PAIR ${user1}, ${user2}`);
   try {
     if (user1 === undefined) return { error: `Remove friend: user1 parameter required`, status: 400 };
     if (user2 === undefined) return { error: `Remove friend: user2 parameter required`, status: 400 };
@@ -421,19 +431,15 @@ async function removeFriend(user1, user2) {
 
     
 
-    db.data.users[user1].reqs.splice(db.data.users[user1].reqs.indexOf(user2), 1);
-    db.data.users[user2].reqs.splice(db.data.users[user2].reqs.indexOf(user1), 1);
+    db.data.users[user1].friends.splice(db.data.users[user1].friends.indexOf(user2), 1);
+    db.data.users[user2].friends.splice(db.data.users[user2].friends.indexOf(user1), 1);
 
     await db.write();
 
-
-
-
-
-    return { success: true, message: `Request from ${db.data.users[sender].name} successfully Denied by ${db.data.users[receiver].name}` };
+    return { success: true, message: `${db.data.users[user1].name} and ${db.data.users[user2].name} were successfully unfreinded` };
   } catch (err) {
     console.error("Remove friend: Error: " + err.message);
-    return { error: 'Remove friend: error Denying request: ' + err.message, status: 500 };
+    return { error: 'Remove friend: error removing freinds: ' + err.message, status: 500 };
   }
 }
 
