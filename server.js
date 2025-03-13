@@ -161,8 +161,8 @@ async function tryLogin(username, password) {
 async function newChat(name, users) {
   console.log(`REQUEST: CREATE NEW CHAT ${name} WITH USERS ${users}`);
   try {
-    if (name === undefined) return { error: `New Chat: name parameter required`, status: 400 };
-    if (users === undefined) return { error: `New Chat: users parameter required`, status: 400 };
+    if (name === undefined) return { error: `New Chat: name parameter required`, status: 400 }; // Check if theres a name
+    if (users === undefined) return { error: `New Chat: users parameter required`, status: 400 }; // Check if there are users
 
     const info = await read('info'); // Get info
 
@@ -192,14 +192,14 @@ async function newChat(name, users) {
 async function addUserToChat(chat, user) {
   console.log(`REQUEST: ADD ${user} TO CHAT ${chat}}`);
   try {
-    if (chat === undefined) return { error: `Add user to chat: chat parameter required`, status: 400 };
-    if (user === undefined) return { error: `Add user to chat: user parameter required`, status: 400 };
+    if (chat === undefined) return { error: `Add user to chat: chat parameter required`, status: 400 }; // Check if theres a chat
+    if (user === undefined) return { error: `Add user to chat: user parameter required`, status: 400 }; // Check if theres a user
 
-    if (!db.data.users[user]) return { error: `Add user to chat: user does not exist`, status: 400 };
-    if (!db.data.chats[chat]) return { error: `Add user to chat: chat does not exist`, status: 400 };
+    if (!db.data.chats[chat]) return { error: `Add user to chat: chat does not exist`, status: 400 }; // Check if the chat exists
+    if (!db.data.users[user]) return { error: `Add user to chat: user does not exist`, status: 400 }; // Check if the user exists
 
     await db.read();
-    db.data.chats[chat].users.push(user);
+    db.data.chats[chat].users.push(user); // Push the user to the chat user list
     await db.write();
     
     
@@ -213,21 +213,20 @@ async function addUserToChat(chat, user) {
 async function removeUserFromChat(chat, user) {
   console.log(`REQUEST: REMOVE ${user} FROM CHAT ${chat}}`);
   try {
-    if (chat === undefined) return { error: `Remove user from chat: chat parameter required`, status: 400 };
-    if (user === undefined) return { error: `Remove user from chat: user parameter required`, status: 400 };
+    if (chat === undefined) return { error: `Remove user from chat: chat parameter required`, status: 400 }; // Check if theres a chat
+    if (user === undefined) return { error: `Remove user from chat: user parameter required`, status: 400 }; // Check if theres a user
 
-    if (db.data.users[user] === undefined) return { error: `Remove user from chat: user does not exist`, status: 400 };
-    if (db.data.chats[chat] === undefined) return { error: `Remove user from chat: chat does not exist`, status: 400 };
+    if (db.data.users[user] === undefined) return { error: `Remove user from chat: user does not exist`, status: 400 }; // Check if the chat exists
+    if (db.data.chats[chat] === undefined) return { error: `Remove user from chat: chat does not exist`, status: 400 }; // Check if the user exists
 
     await db.read();
 
-    const index = db.data.chats[chat].users.indexOf(user);
-    if (index > -1) {
-      db.data.chats[chat].users.splice(index, 1);
-      await db.write();
-    } else {
+    if(!db.data.chats[chat].users.includes(user)) {
       return { error: `Remove user from chat: user does not exist in chat`, status: 400 }
     }
+
+    db.data.chats[chat].users.splice(db.data.chats[chat].users.indexOf(user), 1);
+    await db.write();
     
     
     return { success: true, message: `User "${db.data.users[user].name}" successfully Removed from chat "${db.data.chats[chat].name}"` };
