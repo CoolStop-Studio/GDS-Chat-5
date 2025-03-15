@@ -245,7 +245,7 @@ async function getMessages(chat, count) {
     if (count == undefined) return { error: 'Get Messages: count parameter is required', status: 400 }; // Check if there's a count
     
     if (db.data.chats[chat] === undefined) return { error: 'Get Messages: chat does not exist', status: 400 } // Check if the chat exists
-    
+
     return await db.data.chats[chat].msgs.slice(-count); // Return the messages
   } catch (err) {
     console.error("Get messages: Error: " + err.message);
