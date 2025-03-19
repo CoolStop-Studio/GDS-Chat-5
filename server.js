@@ -15,7 +15,7 @@ const __dirname = dirname(__filename);
 
 // File paths
 const fileFolder = join(__dirname, 'public');
-const fileName = "test.html";
+const fileName = "main/main.html";
 const dbFile = join(__dirname, 'db.json');
 
 // Server settings
