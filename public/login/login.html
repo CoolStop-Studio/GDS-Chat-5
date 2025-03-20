@@ -1,341 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Design</title>
+    <link rel="stylesheet" href="/style.css">
+    <title>GDS Chat</title>
     <style>
-        :root {
-            --background: rgb(34, 40, 49);
-            --dark: rgb(57, 62, 70);
-            --light: rgb(0, 146, 202);
-            --text: rgb(238, 238, 238);
-        }
+        button {
+            width: 150px;
+            height: 80px;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            padding: 2rem;
-            background-color: var(--dark);
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--light);
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo:active {
-            transform: scale(0.95);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-link {
-            color: var(--text);
-            text-decoration: none;
-            position: relative;
-            padding: 0.5rem 0;
-            cursor: pointer;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: var(--light);
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 100%;
-        }
-
-        .nav-link:active {
-            color: var(--light);
+            font-size: 2em;
         }
 
         main {
-            flex: 1;
-            padding: 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .hero {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            align-items: center;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-
-        .highlight {
-            color: var(--light);
-            font-weight: 500;
-        }
-
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 600px;
-            opacity: 0.8;
-        }
-
-        .cta-button {
-            margin-top: 1rem;
-            background-color: var(--light);
-            color: var(--dark);
-            border: none;
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .cta-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .cards {
-            margin-top: 5rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background-color: var(--dark);
-            border-radius: 8px;
-            padding: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .card:active {
-            transform: translateY(0);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            color: var(--light);
-            margin-bottom: 1.5rem;
-        }
-
-        .card h3 {
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .card p {
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        footer {
-            background-color: var(--dark);
-            padding: 2rem;
-            text-align: center;
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
-        /* Custom switch component */
-        .switch-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: 3rem;
-        }
-
-        .switch {
-            position: relative;
-            width: 60px;
-            height: 34px;
-            cursor: pointer;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--dark);
-            border: 1px solid var(--light);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 3px;
-            background-color: var(--text);
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--light);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-            background-color: var(--dark);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .nav-links {
-                gap: 1rem;
-            }
-            
-            .cards {
-                grid-template-columns: 1fr;
-            }
+            padding: none;
         }
     </style>
 </head>
+
 <body>
-    <header>
-        <nav>
-            <div class="logo">MINIMA</div>
-            <div class="nav-links">
-                <div class="nav-link">Home</div>
-                <div class="nav-link">Features</div>
-                <div class="nav-link">About</div>
-                <div class="nav-link">Contact</div>
-            </div>
-        </nav>
-    </header>
-
     <main>
-        <section class="hero">
-            <h1>Clean. Minimal. <span class="highlight">Perfect</span>.</h1>
-            <p>Experience the beauty of simplicity with our minimalist approach to design. Focus on what matters most with clean interfaces and thoughtful interactions.</p>
-            <button class="cta-button">Get Started</button>
-            
-            <div class="switch-container">
-                <span>Toggle Theme</span>
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </section>
-
-        <section class="cards">
-            <div class="card">
-                <div class="card-icon">◎</div>
-                <h3>Simplicity</h3>
-                <p>Our designs focus on the essential elements, removing clutter and distractions for a more intuitive experience.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">◇</div>
-                <h3>Elegance</h3>
-                <p>Every element is carefully crafted with attention to typography, spacing, and visual harmony.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">△</div>
-                <h3>Functionality</h3>
-                <p>Behind the minimalist aesthetic lies powerful functionality that adapts to your needs.</p>
-            </div>
-        </section>
+        <h1>GDS Chat <span class="highlight">5</span></h1>
+        <input id="username" type="text"></input>
+        <input id="password" type="text"></input>
+        <button onclick="login()">login</button>
     </main>
 
-    <footer>
-        © 2025 MINIMA. All rights reserved.
-    </footer>
-
+    <script src="/api.js"></script>
     <script>
-        // Simple click effects for demo purposes
-        document.querySelectorAll('.nav-link, .card, .cta-button, .logo').forEach(item => {
-            item.addEventListener('click', function() {
-                this.style.opacity = '0.7';
-                setTimeout(() => {
-                    this.style.opacity = '1';
-                }, 150);
-            });
-        });
-
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.documentElement.style.setProperty('--background', 'rgb(238, 238, 238)');
-                document.documentElement.style.setProperty('--dark', 'rgb(210, 215, 220)');
-                document.documentElement.style.setProperty('--text', 'rgb(34, 40, 49)');
-            } else {
-                document.documentElement.style.setProperty('--background', 'rgb(34, 40, 49)');
-                document.documentElement.style.setProperty('--dark', 'rgb(57, 62, 70)');
-                document.documentElement.style.setProperty('--text', 'rgb(238, 238, 238)');
+        const loggedInAccount = localStorage.getItem("loggedInAccount");
+        let loggedIn;
+        if (!loggedInAccount) {
+            loggedIn = false;
+        } else {
+            loggedIn = true;
+        }
+        function login() {
+            try {
+                const value = req('api/tryLogin', { username: document.getElementById('username').value, password: document.getElementById('password').value }, 'GET')
+                alert(JSON.stringify(value))
+            } catch (err) {
+                alert(err)
             }
-        });
+        }
     </script>
 </body>
-</html>

@@ -7,32 +7,43 @@
     <link rel="stylesheet" href="/style.css">
     <title>GDS Chat</title>
     <style>
+        button {
+            width: 150px;
+            height: 80px;
 
+            font-size: 2em;
+        }
+
+        main {
+            padding: none;
+        }
     </style>
 </head>
 
 <body>
-    <button id="login">
-        Login
-    </button>
+    <main>
+        <h1>GDS Chat <span class="highlight">5</span></h1>
+        <p>Non secure, low performance messaging app. Created by Gary</p>
+        <button onclick="launch()">Launch</button>
+    </main>
 
-    <button id="register">
-        register
-    </button>
-
-    <button id="chats">
-        chat
-    </button>
-
-    <button id="options">
-        options
-    </button>
-
-    <script src="api.js"></script>
+    <script src="/api.js"></script>
     <script>
-        req("api/registerUser", { username: "JOE1", password: "1892731" }, "POST")
-            .then(data => alert(JSON.stringify(data)))
-            .catch(error => console.error("Error:", error));
+        const loggedInAccount = localStorage.getItem("loggedInAccount");
+        let loggedIn;
+        if (!loggedInAccount) {
+            loggedIn = false;
+        } else {
+            loggedIn = true;
+        }
 
+        function launch() {
+
+            if (loggedIn) {
+                window.location.replace(`${window.location.protocol}/chat`);
+            } else {
+                window.location.replace(`${window.location.protocol}/login`);
+            }
+        }
     </script>
 </body>

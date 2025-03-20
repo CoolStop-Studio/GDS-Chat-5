@@ -13,12 +13,42 @@
     --active-brightness: 90%;
 }
 
-body {
+* {
+    text-align: center;
+    margin: 0;
+}
 
+html, body {
+    margin: 0px;
+    padding:0px;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    
     background-color: var(--background);
     color: var(--text);
     font-family: "Poppins", sans-serif;
     font-size: 1.2rem;
+    font-weight: 500;
+
+}
+
+p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    opacity: 0.8;
+}
+
+h1 {
+    font-size: 5em;
+    color: var(--text);
+    font-weight: 300;
+}
+
+.highlight {
+    color: var(--light);
     font-weight: 500;
 }
 
@@ -29,10 +59,9 @@ button {
     padding-right: 1vw;
     padding-top: 1vh;
     padding-bottom: 1vh;
-    border-radius: 1em;
+    border-radius: 0.2em;
     transition: var(--hover-transition) ease;
     background-color: var(--light);
-    outline: 2px solid var(--dark);
 }
 
 button:hover {

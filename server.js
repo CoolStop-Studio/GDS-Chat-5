@@ -25,7 +25,8 @@ const pages = {
   "/": "main/main.html",
   "/login": "login/login.html",
   "/register": "register/register.html",
-  "/options": "options/options.html"
+  "/options": "options/options.html",
+  "/test": "test/test.html"
 };
 
 // =====================================
@@ -484,6 +485,7 @@ app.get('/api/tryLogin', async (req, res) => {
   }
 
   if (!result) {
+    console.log({ success: false, message: 'Incorrect username or password' });
     return res.json({ success: false, message: 'Incorrect username or password' });
   }
 
