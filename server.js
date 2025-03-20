@@ -21,6 +21,13 @@ const dbFile = join(__dirname, 'db.json');
 // Server settings
 const PORT = process.env.PORT || 3000;
 
+const pages = {
+  "/": "main/main.html",
+  "/login": "login/login.html",
+  "/register": "register/register.html",
+  "/options": "options/options.html"
+};
+
 // =====================================
 // =========== DATABASE SETUP =========
 // =====================================
@@ -111,12 +118,14 @@ async function registerUser(username, password) {
     const info = db.data.info; // Get info
 
     if (username === undefined) return { error: 'Register: username parameter is required', status: 400 }; // Check if there's a username
-    if (password === undefined) return { error: 'Register: passwprd parameter is required', status: 400 }; // Check if there's a password
+    if (password === undefined) return { error: 'Register: password parameter is required', status: 400 }; // Check if there's a password
 
     if (username.length < info.minUsernameLength) return { error: `Register: Username "${username}" is less than minUsernameLength (${info.minUsernameLength})`, status: 400 }; // Check if username is shorter than min
     if (username.length > info.maxUsernameLength) return { error: `Register: Username "${username}" is more than maxUsernameLength (${info.maxUsernameLength})`, status: 400 }; // Check if username is longer than max
     if (password.length < info.minPasswordLength) return { error: `Register: Password "${password}" is less than minPasswordLength (${info.minPasswordLength})`, status: 400 }; // Check if password is shorter than min
     if (password.length > info.maxPasswordLength) return { error: `Register: Password "${password}" is more than maxPasswordLength (${info.maxPasswordLength})`, status: 400 }; // Check if password is longer than max
+
+    if (db.data.users.some(user => user.name === username)) return { error: `Register: Username "${username}" already exists`, status: 400 };
 
     const time = new Date(); // Get current time
 
@@ -420,11 +429,6 @@ async function removeFriend(user1, user2) {
   }
 }
 
-
-
-
-
-
 // =====================================
 // =========== EXPRESS SETUP ==========
 // =====================================
@@ -586,14 +590,26 @@ app.post('/api/removeFriend', async (req, res) => {
   return res.json(result);
 });
 
+
+// =====================================
+// ============ PAGE ROUTES ============
+// =====================================
+
 // Serve the main application page
-app.get('/', (req, res) => {
-  res.sendFile(join(fileFolder, fileName));
+Object.entries(pages).forEach(([route, file]) => {
+  app.get(route, (req, res) => {
+    res.sendFile(join(fileFolder, file));
+  });
+});
+
+app.get('*', (req, res) => {
+  res.status(404).send('Page not found (bruh type the url right)');
 });
 
 // =====================================
-// =========== SERVER START ===========
+// =========== SERVER START ============
 // =====================================
+
 
 // Start the server after database initialization
 initializeDb().then(() => {

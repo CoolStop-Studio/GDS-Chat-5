@@ -4,34 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <title>GDS Chat</title>
     <style>
-        div {
-            background-color: rgb(115, 115, 115);
-            padding: 2px;
-        }
 
-        body {
-            background-color: rgb(0, 0, 0);
-        }
     </style>
 </head>
 
 <body>
-    <div id="login">
+    <button id="login">
         Login
-    </div>
+    </button>
 
-    <div id="register">
+    <button id="register">
         register
-    </div>
+    </button>
 
-    <div id="chats">
+    <button id="chats">
         chat
-    </div>
+    </button>
 
-    <div id="options">
+    <button id="options">
         options
-    </div>
+    </button>
+
+    <script src="api.js"></script>
+    <script>
+        req("api/registerUser", { username: "JOE1", password: "1892731" }, "POST")
+            .then(data => alert(JSON.stringify(data)))
+            .catch(error => console.error("Error:", error));
+
+    </script>
 </body>
