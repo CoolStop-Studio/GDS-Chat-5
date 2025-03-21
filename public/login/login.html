@@ -31,19 +31,28 @@
     <script src="/api.js"></script>
     <script>
         const loggedInAccount = localStorage.getItem("loggedInAccount");
-        let loggedIn;
-        if (!loggedInAccount) {
-            loggedIn = false;
-        } else {
-            loggedIn = true;
-        }
-        function login() {
-            try {
-                const value = req('api/tryLogin', { username: document.getElementById('username').value, password: document.getElementById('password').value }, 'GET')
-                alert(JSON.stringify(value))
-            } catch (err) {
-                alert(err)
+
+        const parsedAccount = loggedInAccount !== null ? Number(loggedInAccount) || false : false;
+
+        alert(parsedAccount); // Will show the number when logged in, or false when not
+        let loggedIn = !!parsedAccount;
+
+        if (loggedIn) window.location.replace('/chat');
+        async function login() {
+            const result = await req('api/tryLogin', {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            }, 'GET')
+
+            if (result.success) {
+                const userID = await req('api/getIdByName', { name: document.getElementById('username').value }, 'GET');
+                localStorage.setItem("loggedInAccount", userID.value);
+                alert("SUCCESSFULLY LOGGED IN TO " + localStorage.getItem("loggedInAccount"));
+                window.location.replace('/chat');
+            } else {
+                alert("Incorect login!")
             }
+
         }
     </script>
 </body>

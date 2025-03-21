@@ -24,26 +24,34 @@
     <main>
         <h1>GDS Chat <span class="highlight">5</span></h1>
         <p>Non secure, low performance messaging app. Created by Gary</p>
+        <h3 id="account">Not logged in</h3>
         <button onclick="launch()">Launch</button>
     </main>
 
     <script src="/api.js"></script>
     <script>
         const loggedInAccount = localStorage.getItem("loggedInAccount");
-        let loggedIn;
-        if (!loggedInAccount) {
-            loggedIn = false;
-        } else {
-            loggedIn = true;
+
+        const accountId = loggedInAccount !== null ? Number(loggedInAccount) : undefined;
+
+        let loggedIn = accountId !== undefined;
+
+        async function displayAccount() {
+
+            if (loggedIn) {
+                document.getElementById("account").innerHTML = "Logged in to: " + (await req('api/read', { path: `users.${loggedInAccount}.name` }, 'GET')).value;
+            }
         }
 
         function launch() {
 
             if (loggedIn) {
-                window.location.replace(`${window.location.protocol}/chat`);
+                window.location.replace('/chat');
             } else {
-                window.location.replace(`${window.location.protocol}/login`);
+                window.location.replace('/login');
             }
         }
+
+        displayAccount()
     </script>
 </body>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>GDS Chat</title>
+
+</head>
+
+<body>
+    <main>
+        <h1>Welcome</h1>  
+        <button onclick="openOptions()">Options</button>
+        <button onclick="logOut()">Log out</button>
+    </main>
+
+    <script src="/api.js"></script>
+    <script>
+        function logOut() {
+            localStorage.removeItem("loggedInAccount");
+            window.location.replace('/');
+        }
+    </script>
+</body>

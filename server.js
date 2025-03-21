@@ -26,6 +26,7 @@ const pages = {
   "/login": "login/login.html",
   "/register": "register/register.html",
   "/options": "options/options.html",
+  "/chat": "chat/chat.html",
   "/test": "test/test.html"
 };
 
@@ -256,7 +257,7 @@ async function getMessages(chat, count) {
     
     if (db.data.chats[chat] === undefined) return { error: 'Get Messages: chat does not exist', status: 400 } // Check if the chat exists
 
-    return await db.data.chats[chat].msgs.slice(-count); // Return the messages
+    return { messages: db.data.chats[chat].msgs.slice(-count) }; // Return the messages
   } catch (err) {
     console.error("Get messages: Error: " + err.message);
     return { error: 'Get messages: Error reading from database: ' + err.message, status: 500 };
@@ -430,6 +431,27 @@ async function removeFriend(user1, user2) {
   }
 }
 
+
+async function getIdByName(name) {
+  console.log(`REQUEST: GET ID BY NAME: ${name}`);
+  try {
+    await db.read();
+
+    if (name === undefined) return { error: `Get ID by name: name parameter required`, status: 400 }; // Check if there's a name
+
+    const userIndex = db.data.users.findIndex(user => user.name === name);
+    
+    if (userIndex === -1) {
+      return { error: `Get ID by name: user not found`, status: 404 };
+    }
+
+    return userIndex;
+  } catch (err) {
+    console.error("Get ID by name: Error: " + err.message);
+    return { error: 'Get ID by name: error removing friends: ' + err.message, status: 500 };
+  }
+}
+
 // =====================================
 // =========== EXPRESS SETUP ==========
 // =====================================
@@ -592,6 +614,16 @@ app.post('/api/removeFriend', async (req, res) => {
   return res.json(result);
 });
 
+
+app.get('/api/getIdByName', async (req, res) => {
+  const result = await getIdByName(req.query.name);
+
+  if (result.error) {
+    return res.status(result.status).json({ error: result.error });
+  }
+
+  res.json({ value: result });
+});
 
 // =====================================
 // ============ PAGE ROUTES ============
